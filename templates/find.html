@@ -1,0 +1,32 @@
+  
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>
+    Philscrapper
+  </title>  
+  <link href="https://andybrewer.github.io/mvp/mvp.css" rel="stylesheet"></link>
+</head>
+
+<body>
+  <header>
+    <h1>
+      <a href='/'>Philscrapper</a>
+    </h1>
+    <h3> results for: {{searchingBy}}</h3>
+  </header>
+  <main>
+    <h2>Searching by Dailynous</h2>
+    {% for nou in nous %}
+    <div>
+      <h4>
+      <a href='{{nou.link}}'>{{nou.title}}</a></h4>
+      <h5>{{nou.snippet}} | {{nou.date}}</h5>  
+    </div>
+    <hr>
+    {% endfor %}
+  </main>  
+</body>
+
+</html>

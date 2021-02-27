@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Philscrapper</title>
+    <link href="https://andybrewer.github.io/mvp/mvp.css" rel="stylesheet"></link>
+  </head>
+  <body>
+    <header>
+      <h1>Philscrapper<h1>
+      <h3>A service to aggregate all your favorite philosophy news</h3> 
+    </header>
+    <main>    
+      <h2> results for: weekly philosophy news</h2>
+      {% for row in rows %}
+      <div>
+        <h4>
+          <a href='{{row[2]}}'>{{row[1]}}</a></h4>
+          <h5>{{row[0]}} | {{row[3]}}</h5>
+      </div>
+      <hr>
+      {% endfor %}
+    </main>    
+  </body>
+</html> 
