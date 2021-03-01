@@ -4,8 +4,8 @@ from philosophynews import philosophynews_rss
 from guardian import guardian_rss
 
 scrap_list = {
-    'pn' : philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI"),
-    'ga' : guardian_rss("https://www.theguardian.com/world/philosophy/rss")
+    'pn': philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI"),
+    'ga': guardian_rss("https://www.theguardian.com/world/philosophy/rss")
 }
 
 conn = sqlite3.connect("philscrapper.db", isolation_level=None)
@@ -20,12 +20,15 @@ for link in scrap_list.values():
 
 
 c.execute(
-    "SELECT * FROM philscrapper WHERE published BETWEEN datetime(date('now','localtime'), '-7 days') AND date('now','localtime')"
+    "SELECT * FROM philscrapper WHERE published BETWEEN datetime(date('now','localtime'), '-7 days') AND date('now','localtime') ORDER BY published DESC"
 )
+
 rows = c.fetchall()
+
 
 def import_DB():
     return rows
+
 
 with conn:
     with open('dump.sql', 'w', -1, "utf-8") as f:
