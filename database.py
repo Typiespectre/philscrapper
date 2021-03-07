@@ -37,5 +37,5 @@ with conn:
 
 #c.execute("DELETE FROM philscrapper")
 #c.execute("DELETE FROM philscrapper WHERE published BETWEEN '2020-08-31' AND '2021-01-29'")
-conn.commit()
+# conn.commit()
 conn.close()
