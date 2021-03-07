@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 
 
-def guardian_rss(url):
+def warfweftandway_rss(url):
     request_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
     }
@@ -15,8 +15,8 @@ def guardian_rss(url):
         for a in articles:
             title = a.find("title").text.replace("\xa0", "")
             link = a.find("link").text
-            time = a.find("pubDate").text.replace("GMT", "")
-            name = "Guradian"
+            time = a.find("pubDate").text.replace("+0000", "")
+            name = "Warp, Weft and Way"
 
             dateFormatter = "%a, %d %b %Y %H:%M:%S "
             dt = datetime.strptime(time, dateFormatter)
@@ -31,5 +31,5 @@ def guardian_rss(url):
             article_list.append(article)
         return article_list
     except Exception as e:
-        print("Guradian - The scraping job failed. See exception: ")
+        print("Warp, Weft and Way - The scraping job failed. See exception: ")
         print(e)
