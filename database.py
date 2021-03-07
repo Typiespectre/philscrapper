@@ -3,29 +3,39 @@ import datetime
 from philosophynews import philosophynews_rss
 from guardian import guardian_rss
 from apa import apa_rss
-from brainsblog import brainsblog_rss
+from brainsblog import brainsblog_scrapping
 from warpweftandway import warfweftandway_rss
 
 scrap_list = {
-    "pn": philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI"),
-    "gd": guardian_rss("https://www.theguardian.com/world/philosophy/rss"),
-    "ap": apa_rss("http://blog.apaonline.org/feed/"),
-    # "bb": brainsblog_rss("https://philosophyofbrains.com/feed"),
-    "ww": warfweftandway_rss("http://warpweftandway.com/feed/"),
+    # "pn": philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI"),
+    # "gd": guardian_rss("https://www.theguardian.com/world/philosophy/rss"),
+    # "ap": apa_rss("http://blog.apaonline.org/feed/"),
+    "bb": brainsblog_scrapping("https://philosophyofbrains.com/feed"),
+    # "ww": warfweftandway_rss("http://warpweftandway.com/feed/"),
 }
 
 conn = sqlite3.connect("philscrapper.db", isolation_level=None)
 c = conn.cursor()
+"""
 c.execute(
     "CREATE TABLE IF NOT EXISTS philscrapper (name text not null, title text not null, link text not null, published text not null, unique (name, title, link, published))"
 )
-
+"""
+c.execute(
+    "CREATE TABLE IF NOT EXISTS philscrapper_v2 (name text NOT NULL, title text NOT NULL, link text NOT NULL, published text NOT NULL, tags text NOT NULL, unique (name, title, link, published))"
+)
 
 for link in scrap_list.values():
     for i in link:
+        """
         c.execute(
             "INSERT OR REPLACE INTO philscrapper(name, title, link, published) VALUES(?,?,?,?)",
             (i["name"], i["title"], i["link"], i["published"]),
+        )
+        """
+        c.execute(
+            "INSERT OR REPLACE INTO philscrapper_v2(name, title, link, published, tags) VALUES(?,?,?,?,?)",
+            (i["name"], i["title"], i["link"], i["published"], i["tags"]),
         )
 
 
