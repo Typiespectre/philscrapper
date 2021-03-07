@@ -10,7 +10,7 @@ scrap_list = {
     "pn": philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI"),
     "gd": guardian_rss("https://www.theguardian.com/world/philosophy/rss"),
     "ap": apa_rss("http://blog.apaonline.org/feed/"),
-    "bb": brainsblog_rss("https://philosophyofbrains.com/feed"),
+    # "bb": brainsblog_rss("https://philosophyofbrains.com/feed"),
     "ww": warfweftandway_rss("http://warpweftandway.com/feed/"),
 }
 
