@@ -52,7 +52,7 @@ def briansblog_text(url):
         print(e)
 
 
-# 갱신된 기사의 전문에 포함된 특수문자들을 모두 제거한다.
+# 갱신된 기사의 전문에 포함된 특수문자들을 모두 제거한다. (지금은 크게 쓸모 없는 기능)
 def clean_text(text):
     cleaned_text = re.sub(r"\\x..", "", text).strip()
     cleaned_text = re.sub(
@@ -79,14 +79,10 @@ def tagging(text):
 # rss feed로 갱신된 기사를 스크래핑하는 과정을 모두 포함하는 함수.
 def brainsblog_scrapping(url):
     brainsblog_rss(url)
-    for link in article_list:
-        text = briansblog_text(link["link"])
+    for key in article_list:
+        text = briansblog_text(key["link"])
         text = clean_text(text)
-        link["text"] = text
-        link["tags"] = tagging(link["text"])
-        del link["text"]
+        key["text"] = text
+        key["tags"] = tagging(key["text"])
+        del key["text"]
     return article_list
-
-
-url = "https://philosophyofbrains.com/feed"
-brainsblog_scrapping(url)
