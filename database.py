@@ -6,18 +6,18 @@ from sites.apa import apa_scrapping
 from sites.brainsblog import brainsblog_scrapping
 from sites.warpweftandway import warfweftandway_scrapping
 
+scrap_list = [
+    apa_scrapping("http://blog.apaonline.org/feed/"),
+    brainsblog_scrapping("https://philosophyofbrains.com/feed"),
+    warfweftandway_scrapping("http://warpweftandway.com/feed/"),
+]
+# philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI")
+# guardian_rss("https://www.theguardian.com/world/philosophy/rss")
+
 
 def import_DB():
-
-    scrap_list = {
-        # "pn": philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI"),
-        # "gd": guardian_rss("https://www.theguardian.com/world/philosophy/rss"),
-        "ap": apa_scrapping("http://blog.apaonline.org/feed/"),
-        "bb": brainsblog_scrapping("https://philosophyofbrains.com/feed"),
-        "ww": warfweftandway_scrapping("http://warpweftandway.com/feed/"),
-    }
-
     print("Connecting to Database...")
+
     conn = sqlite3.connect("philscrapper.db", isolation_level=None)
     c = conn.cursor()
 
@@ -25,8 +25,8 @@ def import_DB():
         "CREATE TABLE IF NOT EXISTS philscrapper (name text NOT NULL, title text NOT NULL, link text NOT NULL, published text NOT NULL, tags text NOT NULL, unique (name, title, link, published))"
     )
 
-    for key in scrap_list.values():
-        for i in key:
+    for elements in scrap_list:
+        for i in elements:
 
             c.execute(
                 "INSERT OR REPLACE INTO philscrapper(name, title, link, published, tags) VALUES(?,?,?,?,?)",
