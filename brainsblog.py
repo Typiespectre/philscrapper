@@ -38,7 +38,7 @@ def brainsblog_rss(url):
         print(e)
 
 
-# 갱신된 기사의 text 전문을 가져온다.
+# 갱신된 기사들의 text 전문을 가져온다.
 def briansblog_text(url):
     text = ""
     try:

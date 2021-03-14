@@ -4,7 +4,7 @@ import unicodedata
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-
+# 사이트의 rss feed에서 갱신되는 기사의 제목, 링크, 시간에 사이트 이름을 붙여서 가져온다.
 def apa_rss(url):
     request_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
@@ -38,6 +38,7 @@ def apa_rss(url):
         print(e)
 
 
+# 갱신된 기사들의 text 전문을 가져온다.
 def apa_text(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
@@ -59,6 +60,7 @@ def apa_text(url):
         print(e)
 
 
+# 갱신된 기사의 전문에 포함된 특수문자들을 모두 제거한다. (지금은 크게 쓸모 없는 기능)
 def clean_text(text):
     cleaned_text = text.strip().replace("\n", "")
     cleaned_text = re.sub(
@@ -69,7 +71,7 @@ def clean_text(text):
 
 phil_types = ["Aesthetics", "Epistemology", "Ethics", "Logic", "Metaphysics", "Minds"]
 
-
+# 전문 중 phil_types의 문자열의 일부에 맞는 단어가 있을 경우 tag를 한다.
 def tagging(text):
     tags = []
     for types in phil_types:
@@ -81,6 +83,8 @@ def tagging(text):
     return tag
 
 
+# 위 함수들을 하나로 통합한 중심 함수!
+# rss feed로 갱신된 기사를 스크래핑하는 과정을 모두 포함하는 함수.
 def apa_scrapping(url):
     apa_rss(url)
     for key in article_list:

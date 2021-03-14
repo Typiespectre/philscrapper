@@ -4,14 +4,14 @@ from philosophynews import philosophynews_rss
 from guardian import guardian_rss
 from apa import apa_scrapping
 from brainsblog import brainsblog_scrapping
-from warpweftandway import warfweftandway_rss
+from warpweftandway import warfweftandway_scrapping
 
 scrap_list = {
     # "pn": philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI"),
     # "gd": guardian_rss("https://www.theguardian.com/world/philosophy/rss"),
     "ap": apa_scrapping("http://blog.apaonline.org/feed/"),
     "bb": brainsblog_scrapping("https://philosophyofbrains.com/feed"),
-    # "ww": warfweftandway_rss("http://warpweftandway.com/feed/"),
+    "ww": warfweftandway_scrapping("http://warpweftandway.com/feed/"),
 }
 
 conn = sqlite3.connect("philscrapper.db", isolation_level=None)
