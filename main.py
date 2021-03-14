@@ -4,11 +4,13 @@ from database import import_DB
 app = Flask("philscrapper")
 
 
-@app.route('/')
+@app.route("/")
 def home():
     rows = import_DB()
-    return render_template('home.html', rows=rows)
+    return render_template("home.html", rows=rows)
 
+
+# 임시 탬플릿...
 """
 @app.route('/find')
 def find():
@@ -21,6 +23,5 @@ def find():
     return render_template('find.html', searchingBy=word, nous=nous)
 """
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
-

@@ -6,6 +6,7 @@ from datetime import datetime
 
 # 사이트의 rss feed에서 갱신되는 기사의 제목, 링크, 시간에 사이트 이름을 붙여서 가져온다.
 def apa_rss(url):
+    print("Connecting to APA rss feed...")
     request_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
     }
@@ -34,12 +35,13 @@ def apa_rss(url):
             article_list.append(article)
         return article_list
     except Exception as e:
-        print("APA - The scraping job failed. See exception: ")
+        print("APA (rss feed) - The scraping job failed. See exception: ")
         print(e)
 
 
 # 갱신된 기사들의 text 전문을 가져온다.
 def apa_text(url):
+    print("scrapping article text...")
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
     }
@@ -56,7 +58,7 @@ def apa_text(url):
             text = "".join(text_list)
             return text
     except Exception as e:
-        print("APA - The scraping job failed. See exception: ")
+        print("APA (scrapping) - The scraping job failed. See exception: ")
         print(e)
 
 
@@ -93,4 +95,5 @@ def apa_scrapping(url):
         key["text"] = text
         key["tags"] = tagging(key["text"])
         del key["text"]
+    print("Scrapping APA Finished!")
     return article_list
