@@ -4,19 +4,19 @@ from sites.philosophynews import philosophynews_rss
 from sites.guardian import guardian_rss
 from sites.apa import apa_scrapping
 from sites.brainsblog import brainsblog_scrapping
-from sites.warpweftandway import warfweftandway_scrapping
+from sites.warpweftandway import warpweftandway_scrapping
 
 scrap_list = [
     apa_scrapping("http://blog.apaonline.org/feed/"),
     brainsblog_scrapping("https://philosophyofbrains.com/feed"),
-    warfweftandway_scrapping("http://warpweftandway.com/feed/"),
+    warpweftandway_scrapping("http://warpweftandway.com/feed/"),
 ]
 # philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI")
 # guardian_rss("https://www.theguardian.com/world/philosophy/rss")
 
 
 def import_DB():
-    print("Connecting to Database...")
+    print("\nConnecting to Database...\n")
 
     conn = sqlite3.connect("philscrapper.db", isolation_level=None)
     c = conn.cursor()
@@ -46,5 +46,5 @@ def import_DB():
 
     conn.commit()
     conn.close()
-    print("Connect Database Finished!")
+    print("\nDatabase Task Finished!\n")
     return rows
