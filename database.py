@@ -1,18 +1,16 @@
 import sqlite3
 import datetime
-from sites.philosophynews import philosophynews_rss
-from sites.guardian import guardian_rss
 from sites.apa import apa_scrapping
 from sites.brainsblog import brainsblog_scrapping
 from sites.warpweftandway import warpweftandway_scrapping
+from sites.aeon import aeon_scrapping
 
 scrap_list = [
     apa_scrapping("http://blog.apaonline.org/feed/"),
     brainsblog_scrapping("https://philosophyofbrains.com/feed"),
     warpweftandway_scrapping("http://warpweftandway.com/feed/"),
+    aeon_scrapping("https://aeon.co/feed.rss"),
 ]
-# philosophynews_rss("http://feeds.feedburner.com/philosophynews/jcFI")
-# guardian_rss("https://www.theguardian.com/world/philosophy/rss")
 
 
 def import_DB():
