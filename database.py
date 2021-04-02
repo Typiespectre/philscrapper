@@ -1,18 +1,17 @@
-import sqlite3
-import datetime
+# import sqlite3
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.orm import sessionmaker
+
 from sites.apa import apa_scrapping
 from sites.brainsblog import brainsblog_scrapping
 from sites.warpweftandway import warpweftandway_scrapping
 from sites.aeon import aeon_scrapping
 
-scrap_list = [
-    apa_scrapping("http://blog.apaonline.org/feed/"),
-    brainsblog_scrapping("https://philosophyofbrains.com/feed"),
-    warpweftandway_scrapping("http://warpweftandway.com/feed/"),
-    aeon_scrapping("https://aeon.co/feed.rss"),
-]
-
-
+"""
 def import_DB():
     print("\nConnecting to Database...\n")
 
@@ -45,4 +44,71 @@ def import_DB():
     conn.commit()
     conn.close()
     print("\nDatabase Task Finished!\n")
+    return rows
+"""
+timezone(timedelta(hours=9))
+
+scrap_list = [
+    apa_scrapping("http://blog.apaonline.org/feed/"),
+    # brainsblog_scrapping("https://philosophyofbrains.com/feed"),
+    # warpweftandway_scrapping("http://warpweftandway.com/feed/"),
+    # aeon_scrapping("https://aeon.co/feed.rss"),
+]
+
+
+def import_DB():
+    engine = create_engine("sqlite:///philDB.db", echo=True)
+    Base = declarative_base()
+    Session = sessionmaker()
+
+    class Article(Base):
+        __tablename__ = "Articles"
+
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        name = Column(String, nullable=False)
+        title = Column(String, nullable=False)
+        link = Column(String, nullable=False)
+        published = Column(String, nullable=False)
+        tags = Column(String, nullable=False)
+
+        def __init__(self, name, title, link, published, tags):
+            self.name = name
+            self.title = title
+            self.link = link
+            self.published = published
+            self.tags = tags
+
+        def __repr__(self):
+            return "<Article('%s','%s','%s','%s','%s')>" % (
+                self.name,
+                self.title,
+                self.link,
+                self.published,
+                self.tags,
+            )
+
+        def as_dict(self):
+            return {x.name: getattr(self, x.name) for x in self.__table__.columns}
+
+    Base.metadata.create_all(engine)
+    Session.configure(bind=engine)
+    session = Session()
+
+    for elements in scrap_list:
+        for i in elements:
+            db_article = Article(
+                i["name"], i["title"], i["link"], i["published"], i["tags"]
+            )
+            try:
+                session.add(db_article)
+                session.commit()
+            except Exception as e:
+                print("\nDatabase job failed. See exception:")
+                print(e)
+                session.rollback()
+
+    result = engine.execute(
+        "SELECT * FROM Articles WHERE published BETWEEN datetime(date('now','localtime'), '-7 days') AND date('now','localtime') ORDER BY published DESC"
+    )
+    rows = result.fetchall()
     return rows
