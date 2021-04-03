@@ -59,7 +59,6 @@ scrap_list = [
 def import_DB():
     engine = create_engine("sqlite:///philDB.db", echo=True)
     Base = declarative_base()
-    Session = sessionmaker()
 
     class Article(Base):
         __tablename__ = "Articles"
@@ -90,7 +89,18 @@ def import_DB():
         def as_dict(self):
             return {x.name: getattr(self, x.name) for x in self.__table__.columns}
 
+        @classmethod
+        def get_or_create(cls, name, title, link, published, tags):
+            exists = session.query(Article.id).filter_by(link=link).scalar() is not None
+            if exists:
+                return session.query(Article).filter_by(link=link).first()
+            return cls(
+                name=name, title=title, link=link, published=published, tags=tags
+            )
+
     Base.metadata.create_all(engine)
+
+    Session = sessionmaker()
     Session.configure(bind=engine)
     session = Session()
 
@@ -100,15 +110,46 @@ def import_DB():
                 i["name"], i["title"], i["link"], i["published"], i["tags"]
             )
             try:
-                session.add(db_article)
+                article = Article.get_or_create(
+                    name=i["name"],
+                    title=i["title"],
+                    link=i["link"],
+                    published=i["published"],
+                    tags=i["tags"],
+                )
+                if article not in session:
+                    session.add(article)
                 session.commit()
             except Exception as e:
                 print("\nDatabase job failed. See exception:")
                 print(e)
                 session.rollback()
 
+    # raw SQL문을 쓰기 싫지만... 지금은 마땅한 생각이 나지 않는다.
     result = engine.execute(
         "SELECT * FROM Articles WHERE published BETWEEN datetime(date('now','localtime'), '-7 days') AND date('now','localtime') ORDER BY published DESC"
     )
     rows = result.fetchall()
+    session.close()
     return rows
+
+
+def check_DB(article_link):
+    engine = create_engine("sqlite:///philDB.db", echo=True)
+    Base = declarative_base()
+
+    class Article(Base):
+        __tablename__ = "Articles"
+
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        name = Column(String, nullable=False)
+        title = Column(String, nullable=False)
+        link = Column(String, nullable=False)
+        published = Column(String, nullable=False)
+        tags = Column(String, nullable=False)
+
+    Base.metadata.create_all(engine)
+
+    Session = sessionmaker()
+    Session.configure(bind=engine)
+    session = Session()
