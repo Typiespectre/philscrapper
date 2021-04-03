@@ -3,6 +3,7 @@ import re
 import unicodedata
 from bs4 import BeautifulSoup
 from datetime import datetime
+from database import check_DB
 
 # 사이트의 rss feed에서 갱신되는 기사의 제목, 링크, 시간에 사이트 이름을 붙여서 가져온다.
 def apa_rss(url):
@@ -26,13 +27,15 @@ def apa_rss(url):
             dt = datetime.strptime(time, dateFormatter)
             published = dt.strftime("%Y-%m-%d")
 
-            article = {
-                "name": name,
-                "title": title,
-                "link": link,
-                "published": published,
-            }
-            article_list.append(article)
+            # DB에 저장되어 있지 않은 데이터를 list에 append한다.
+            if check_DB(link) is not None:
+                article = {
+                    "name": name,
+                    "title": title,
+                    "link": link,
+                    "published": published,
+                }
+                article_list.append(article)
         return article_list
     except Exception as e:
         print("APA (rss feed) - The scraping job failed. See exception: ")
@@ -41,7 +44,7 @@ def apa_rss(url):
 
 # 갱신된 기사들의 text 전문을 가져온다.
 def apa_text(url, n, list_len):
-    print(f"\nscrapping article text... {n}/{list_len}")
+    print(f"scrapping article text... {n}/{list_len}")
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
     }
@@ -162,5 +165,5 @@ def apa_scrapping(url):
         key["tags"] = tagging(key["text"])
         del key["text"]
         n += 1
-    print("\nScrapping APA Finished!\n")
+    print("Scrapping APA Finished!\n")
     return article_list

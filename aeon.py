@@ -3,10 +3,11 @@ import re
 import unicodedata
 from bs4 import BeautifulSoup
 from datetime import datetime
+from database import check_DB
 
 # 사이트의 rss feed에서 갱신되는 기사의 제목, 링크, 시간에 사이트 이름을 붙여서 가져온다.
-def warpweftandway_rss(url):
-    print("\nConnecting to Warp, Weft and Way rss feed...")
+def aeon_rss(url):
+    print("\nConnecting to Aeon rss feed...")
     request_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
     }
@@ -20,51 +21,49 @@ def warpweftandway_rss(url):
             title = a.find("title").text.replace("\xa0", "")
             link = a.find("link").text
             time = a.find("pubDate").text.replace("+0000", "")
-            name = "Warp, Weft and Way"
+            name = "Aeon"
 
             dateFormatter = "%a, %d %b %Y %H:%M:%S "
             dt = datetime.strptime(time, dateFormatter)
             published = dt.strftime("%Y-%m-%d")
 
-            article = {
-                "name": name,
-                "title": title,
-                "link": link,
-                "published": published,
-            }
-            article_list.append(article)
+            # DB에 저장되어 있지 않은 데이터를 list에 append한다.
+            if check_DB(link) is not None:
+                article = {
+                    "name": name,
+                    "title": title,
+                    "link": link,
+                    "published": published,
+                }
+                article_list.append(article)
         return article_list
     except Exception as e:
-        print(
-            "Warp, Weft and Way (rss feed) - The scraping job failed. See exception: "
-        )
+        print("Aeon (rss feed) - The scraping job failed. See exception: ")
         print(e)
 
 
 # 갱신된 기사들의 text 전문을 가져온다.
-def warpweftandway_text(url, n, list_len):
-    print(f"\nscrapping article text... {n}/{list_len}")
+def aeon_text(url, n, list_len):
+    print(f"scrapping article text... {n}/{list_len}")
     text = ""
     try:
         r = requests.get(url)
         soup = BeautifulSoup(r.text, "lxml")
-        for item in soup.find_all("div", {"class": "entry-content"}):
+        for item in soup.find_all("div", {"class": "article__body__content"}):
             text = text + str(item.find_all(text=True))
-            text = "".join(text)
             return text
     except Exception as e:
-        print(
-            "Warp, Weft and Way (scrapping) - The scraping job failed. See exception: "
-        )
+        print("Aeon (scrapping) - The scraping job failed. See exception: ")
         print(e)
 
 
-# 갱신된 기사의 전문에 포함된 특수문자들을 모두 제거한다. (지금은 크게 쓸모 없는 기능)
+# 갱신된 기사의 전문에 포함된 숫자와 특수문자들을 모두 제거한다. (아직은 딱히 쓸모 없는 기능)
 def clean_text(text):
-    cleaned_text = re.sub(r"\\x..", "", text).strip()
-    cleaned_text = re.sub(r"\\n..", "", cleaned_text)
+    new_text = ""
+    cleaned_text = re.sub(r"\\x..", "", text, flags=re.I)
+    cleaned_text = re.sub(r"\\n..", "", text, flags=re.I)
     cleaned_text = re.sub(
-        "[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\('\"’”“–]", "", cleaned_text
+        "[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\('\"’”“–—]", "", cleaned_text
     )
     cleaned_text = re.sub(r"[0-9]", " ", cleaned_text)
     cleaned_text = re.sub(r"\s+", " ", cleaned_text, flags=re.I)
@@ -91,7 +90,6 @@ Logic = [
     "deduction",
     "induction",
     "dialectic",
-    "formal",
     "mathematical",
     "demonstration",
     "analogy",
@@ -150,15 +148,15 @@ def tagging(text):
 
 # 위 함수들을 하나로 통합한 중심 함수!
 # rss feed로 갱신된 기사를 스크래핑하는 과정을 모두 포함하는 함수.
-def warpweftandway_scrapping(url):
-    warpweftandway_rss(url)
+def aeon_scrapping(url):
+    aeon_rss(url)
     n = 1
     for key in article_list:
-        text = warpweftandway_text(key["link"], n, len(article_list))
+        text = aeon_text(key["link"], n, len(article_list))
         text = clean_text(text)
         key["text"] = text
         key["tags"] = tagging(key["text"])
         del key["text"]
         n += 1
-    print("\nScrapping Warp, Weft and Way Finished!\n")
+    print("Scrapping Aeon Finished!\n")
     return article_list

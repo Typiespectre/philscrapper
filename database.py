@@ -6,11 +6,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import sessionmaker
 
-from sites.apa import apa_scrapping
-from sites.brainsblog import brainsblog_scrapping
-from sites.warpweftandway import warpweftandway_scrapping
-from sites.aeon import aeon_scrapping
-
 """
 def import_DB():
     print("\nConnecting to Database...\n")
@@ -46,19 +41,30 @@ def import_DB():
     print("\nDatabase Task Finished!\n")
     return rows
 """
-timezone(timedelta(hours=9))
-
-scrap_list = [
-    apa_scrapping("http://blog.apaonline.org/feed/"),
-    # brainsblog_scrapping("https://philosophyofbrains.com/feed"),
-    # warpweftandway_scrapping("http://warpweftandway.com/feed/"),
-    # aeon_scrapping("https://aeon.co/feed.rss"),
-]
 
 
 def import_DB():
-    engine = create_engine("sqlite:///philDB.db", echo=True)
+
+    from apa import apa_scrapping
+    from brainsblog import brainsblog_scrapping
+    from warpweftandway import warpweftandway_scrapping
+    from aeon import aeon_scrapping
+
+    scrap_list = [
+        apa_scrapping("http://blog.apaonline.org/feed/"),
+        brainsblog_scrapping("https://philosophyofbrains.com/feed"),
+        warpweftandway_scrapping("http://warpweftandway.com/feed/"),
+        aeon_scrapping("https://aeon.co/feed.rss"),
+    ]
+
+    timezone(timedelta(hours=9))
+
+    engine = create_engine("sqlite:///philDB.db")  # echo=True
     Base = declarative_base()
+
+    Session = sessionmaker()
+    Session.configure(bind=engine)
+    session = Session()
 
     class Article(Base):
         __tablename__ = "Articles"
@@ -100,10 +106,6 @@ def import_DB():
 
     Base.metadata.create_all(engine)
 
-    Session = sessionmaker()
-    Session.configure(bind=engine)
-    session = Session()
-
     for elements in scrap_list:
         for i in elements:
             db_article = Article(
@@ -135,7 +137,7 @@ def import_DB():
 
 
 def check_DB(article_link):
-    engine = create_engine("sqlite:///philDB.db", echo=True)
+    engine = create_engine("sqlite:///philDB.db")
     Base = declarative_base()
 
     class Article(Base):
@@ -153,3 +155,9 @@ def check_DB(article_link):
     Session = sessionmaker()
     Session.configure(bind=engine)
     session = Session()
+
+    exists = session.query(Article.id).filter_by(link=article_link).scalar() is not None
+    if not exists:
+        return article_link
+
+    session.close()
