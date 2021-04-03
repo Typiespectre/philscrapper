@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request
-from database import import_DB
+from database import make_DB, import_DB
 
 app = Flask("philscrapper")
+make_DB()
 
 
 @app.route("/")

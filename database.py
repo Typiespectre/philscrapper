@@ -43,7 +43,7 @@ def import_DB():
 """
 
 
-def import_DB():
+def make_DB():
 
     from apa import apa_scrapping
     from brainsblog import brainsblog_scrapping
@@ -127,13 +127,8 @@ def import_DB():
                 print(e)
                 session.rollback()
 
-    # raw SQL문을 쓰기 싫지만... 지금은 마땅한 생각이 나지 않는다.
-    result = engine.execute(
-        "SELECT * FROM Articles WHERE published BETWEEN datetime(date('now','localtime'), '-7 days') AND date('now','localtime') ORDER BY published DESC"
-    )
-    rows = result.fetchall()
     session.close()
-    return rows
+    return
 
 
 def check_DB(article_link):
@@ -161,3 +156,34 @@ def check_DB(article_link):
         return article_link
 
     session.close()
+    return
+
+
+def import_DB():
+    engine = create_engine("sqlite:///philDB.db")
+    Base = declarative_base()
+
+    class Article(Base):
+        __tablename__ = "Articles"
+
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        name = Column(String, nullable=False)
+        title = Column(String, nullable=False)
+        link = Column(String, nullable=False)
+        published = Column(String, nullable=False)
+        tags = Column(String, nullable=False)
+
+    Base.metadata.create_all(engine)
+
+    Session = sessionmaker()
+    Session.configure(bind=engine)
+    session = Session()
+
+    # raw SQL문을 쓰기 싫지만... 지금은 마땅한 생각이 나지 않는다.
+    result = engine.execute(
+        "SELECT * FROM Articles WHERE published BETWEEN datetime(date('now','localtime'), '-7 days') AND date('now','localtime') ORDER BY published DESC"
+    )
+    rows = result.fetchall()
+
+    session.close()
+    return rows
