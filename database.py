@@ -52,9 +52,9 @@ def make_DB():
 
     scrap_list = [
         apa_scrapping("http://blog.apaonline.org/feed/"),
-        brainsblog_scrapping("https://philosophyofbrains.com/feed"),
-        warpweftandway_scrapping("http://warpweftandway.com/feed/"),
-        aeon_scrapping("https://aeon.co/feed.rss"),
+        # brainsblog_scrapping("https://philosophyofbrains.com/feed"),
+        # warpweftandway_scrapping("http://warpweftandway.com/feed/"),
+        # aeon_scrapping("https://aeon.co/feed.rss"),
     ]
 
     timezone(timedelta(hours=9))
@@ -75,6 +75,7 @@ def make_DB():
         link = Column(String, nullable=False)
         published = Column(String, nullable=False)
         tags = Column(String, nullable=False)
+        rank = Column(Integer)
 
         def __init__(self, name, title, link, published, tags):
             self.name = name
@@ -82,6 +83,7 @@ def make_DB():
             self.link = link
             self.published = published
             self.tags = tags
+            self.rank = rank
 
         def __repr__(self):
             return "<Article('%s','%s','%s','%s','%s')>" % (
@@ -90,18 +92,24 @@ def make_DB():
                 self.link,
                 self.published,
                 self.tags,
+                self.rank,
             )
 
         def as_dict(self):
             return {x.name: getattr(self, x.name) for x in self.__table__.columns}
 
         @classmethod
-        def get_or_create(cls, name, title, link, published, tags):
+        def get_or_create(cls, name, title, link, published, tags, rank):
             exists = session.query(Article.id).filter_by(link=link).scalar() is not None
             if exists:
                 return session.query(Article).filter_by(link=link).first()
             return cls(
-                name=name, title=title, link=link, published=published, tags=tags
+                name=name,
+                title=title,
+                link=link,
+                published=published,
+                tags=tags,
+                rank=rank,
             )
 
     Base.metadata.create_all(engine)

@@ -152,6 +152,8 @@ def tagging(text):
     tag = ", ".join(tag_list)
     return tag
 
+def ranking(text):
+
 
 # 위 함수들을 하나로 통합한 중심 함수!
 # rss feed로 갱신된 기사를 스크래핑하는 과정을 모두 포함하는 함수.
@@ -163,6 +165,7 @@ def apa_scrapping(url):
         text = clean_text(text)
         key["text"] = text
         key["tags"] = tagging(key["text"])
+        key["rank"] = ranking(key["text"])
         del key["text"]
         n += 1
     print("Scrapping APA Finished!\n")

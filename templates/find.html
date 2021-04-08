@@ -4,7 +4,7 @@
 
 <head>
   <title>
-    Philscrapper
+    Philnewsfeed
   </title>  
   <link href="https://andybrewer.github.io/mvp/mvp.css" rel="stylesheet"></link>
 </head>
@@ -12,21 +12,19 @@
 <body>
   <header>
     <h1>
-      <a href='/'>Philscrapper</a>
+      <a href='/'>Philnewsfeed</a>
     </h1>
-    <h3> results for: {{searchingBy}}</h3>
   </header>
-  <main>
-    <h2>Searching by Dailynous</h2>
-    {% for nou in nous %}
+  <main>    
+    <h2> results for: Top news</h2>
+    {% for row in rows %}
     <div>
       <h4>
-      <a href='{{nou.link}}'>{{nou.title}}</a></h4>
-      <h5>{{nou.snippet}} | {{nou.date}}</h5>  
+        <a href='{{row[3]}}'>{{row[2]}}</a></h4>
+        <h5>{{row[1]}} | {{row[4]}} | {{row[5]}}</h5>
     </div>
     <hr>
     {% endfor %}
-  </main>  
+  </main>    
 </body>
-
-</html>
+</html> 
