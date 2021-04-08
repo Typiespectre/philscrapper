@@ -6,42 +6,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import sessionmaker
 
-"""
-def import_DB():
-    print("\nConnecting to Database...\n")
-
-    conn = sqlite3.connect("philscrapper.db", isolation_level=None)
-    c = conn.cursor()
-
-    c.execute(
-        "CREATE TABLE IF NOT EXISTS philscrapper (name text NOT NULL, title text NOT NULL, link text NOT NULL, published text NOT NULL, tags text NOT NULL, unique (name, title, link, published))"
-    )
-
-    for elements in scrap_list:
-        for i in elements:
-
-            c.execute(
-                "INSERT OR REPLACE INTO philscrapper(name, title, link, published, tags) VALUES(?,?,?,?,?)",
-                (i["name"], i["title"], i["link"], i["published"], i["tags"]),
-            )
-
-    c.execute(
-        "SELECT * FROM philscrapper WHERE published BETWEEN datetime(date('now','localtime'), '-7 days') AND date('now','localtime') ORDER BY published DESC"
-    )
-
-    rows = c.fetchall()
-
-    with conn:
-        with open("dump.sql", "w", -1, "utf-8") as f:
-            for line in conn.iterdump():
-                f.write("%s\n" % line)
-
-    conn.commit()
-    conn.close()
-    print("\nDatabase Task Finished!\n")
-    return rows
-"""
-
 
 def make_DB():
 
@@ -52,9 +16,9 @@ def make_DB():
 
     scrap_list = [
         apa_scrapping("http://blog.apaonline.org/feed/"),
-        # brainsblog_scrapping("https://philosophyofbrains.com/feed"),
-        # warpweftandway_scrapping("http://warpweftandway.com/feed/"),
-        # aeon_scrapping("https://aeon.co/feed.rss"),
+        brainsblog_scrapping("https://philosophyofbrains.com/feed"),
+        warpweftandway_scrapping("http://warpweftandway.com/feed/"),
+        aeon_scrapping("https://aeon.co/feed.rss"),
     ]
 
     timezone(timedelta(hours=9))
@@ -77,7 +41,7 @@ def make_DB():
         tags = Column(String, nullable=False)
         rank = Column(Integer)
 
-        def __init__(self, name, title, link, published, tags):
+        def __init__(self, name, title, link, published, tags, rank):
             self.name = name
             self.title = title
             self.link = link
@@ -86,7 +50,7 @@ def make_DB():
             self.rank = rank
 
         def __repr__(self):
-            return "<Article('%s','%s','%s','%s','%s')>" % (
+            return "<Article('%s','%s','%s','%s','%s','%s')>" % (
                 self.name,
                 self.title,
                 self.link,
@@ -117,7 +81,7 @@ def make_DB():
     for elements in scrap_list:
         for i in elements:
             db_article = Article(
-                i["name"], i["title"], i["link"], i["published"], i["tags"]
+                i["name"], i["title"], i["link"], i["published"], i["tags"], i["rank"]
             )
             try:
                 article = Article.get_or_create(
@@ -126,6 +90,7 @@ def make_DB():
                     link=i["link"],
                     published=i["published"],
                     tags=i["tags"],
+                    rank=i["rank"],
                 )
                 if article not in session:
                     session.add(article)
@@ -152,6 +117,7 @@ def check_DB(article_link):
         link = Column(String, nullable=False)
         published = Column(String, nullable=False)
         tags = Column(String, nullable=False)
+        rank = Column(Integer)
 
     Base.metadata.create_all(engine)
 
@@ -180,6 +146,7 @@ def import_DB():
         link = Column(String, nullable=False)
         published = Column(String, nullable=False)
         tags = Column(String, nullable=False)
+        rank = Column(Integer)
 
     Base.metadata.create_all(engine)
 
@@ -191,6 +158,35 @@ def import_DB():
     result = engine.execute(
         "SELECT * FROM Articles WHERE published BETWEEN datetime(date('now','localtime'), '-7 days') AND date('now','localtime') ORDER BY published DESC"
     )
+    rows = result.fetchall()
+
+    session.close()
+    return rows
+
+
+def rank_import_DB():
+    engine = create_engine("sqlite:///philDB.db")
+    Base = declarative_base()
+
+    class Article(Base):
+        __tablename__ = "Articles"
+
+        id = Column(Integer, primary_key=True, autoincrement=True)
+        name = Column(String, nullable=False)
+        title = Column(String, nullable=False)
+        link = Column(String, nullable=False)
+        published = Column(String, nullable=False)
+        tags = Column(String, nullable=False)
+        rank = Column(Integer)
+
+    Base.metadata.create_all(engine)
+
+    Session = sessionmaker()
+    Session.configure(bind=engine)
+    session = Session()
+
+    # raw SQL문을 쓰기 싫지만... 지금은 마땅한 생각이 나지 않는다.
+    result = engine.execute("SELECT * FROM Articles WHERE rank = 1")
     rows = result.fetchall()
 
     session.close()

@@ -156,7 +156,22 @@ def aeon_scrapping(url):
         text = clean_text(text)
         key["text"] = text
         key["tags"] = tagging(key["text"])
+        key["text_rank"] = len(key["text"])
         del key["text"]
         n += 1
+
+    # 순위 매기기
+    # tag가 'others'인 경우, 대부분 뉴스 기사가 아니기에 최하위 rank를 부여함
+    sort_article_list = enumerate(
+        sorted(article_list, key=lambda rank: (rank["text_rank"]), reverse=True), 1
+    )
+
+    for rank, key in sort_article_list:
+        if key["tags"] == "others":
+            key["rank"] = 99
+        else:
+            key["rank"] = rank
+        del key["text_rank"]
+
     print("Scrapping Aeon Finished!\n")
     return article_list
