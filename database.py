@@ -13,12 +13,14 @@ def make_DB():
     from brainsblog import brainsblog_scrapping
     from warpweftandway import warpweftandway_scrapping
     from aeon import aeon_scrapping
+    from sep import sep_scrapping
 
     scrap_list = [
         apa_scrapping("http://blog.apaonline.org/feed/"),
         brainsblog_scrapping("https://philosophyofbrains.com/feed"),
         warpweftandway_scrapping("http://warpweftandway.com/feed/"),
         aeon_scrapping("https://aeon.co/feed.rss"),
+        sep_scrapping("https://plato.stanford.edu/rss/sep.xml"),
     ]
 
     timezone(timedelta(hours=9))
