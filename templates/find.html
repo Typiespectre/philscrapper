@@ -8,20 +8,23 @@
   </title>  
   <link href="https://andybrewer.github.io/mvp/mvp.css" rel="stylesheet"></link>
 </head>
-
 <body>
   <header>
     <h1>
       <a href='/'>Philnewsfeed</a>
     </h1>
+    <h3>A service to aggregate all your favorite philosophy news</h3>
+    <h3> 
+      <a href='/'>weekly news</a>
+    </h3>
   </header>
   <main>    
     <h2> results for: Top news</h2>
     {% for row in rows %}
     <div>
       <h4>
-        <a href='{{row[3]}}'>{{row[2]}}</a></h4>
-        <h5>{{row[1]}} | {{row[4]}} | {{row[5]}} | Top rank!</h5>
+        <a href='{{row[1]}}'>{{row[2]}}</a></h4>
+        <h5>{{row[0]}} | {{row[4]}} | {{row[3]}}</h5>
     </div>
     <hr>
     {% endfor %}
