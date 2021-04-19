@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  philscrapper:
+    image: philscrapper:1.0
+    build: .
+    volumes:
+      - ~/data/philscrapper/:/data/

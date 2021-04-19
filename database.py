@@ -25,7 +25,7 @@ def make_DB():
 
     timezone(timedelta(hours=9))
 
-    engine = create_engine("sqlite:///philDB.db")  # echo=True
+    engine = create_engine("sqlite:///data/phil.db")  # echo=True
     Base = declarative_base()
 
     Session = sessionmaker()
@@ -107,7 +107,7 @@ def make_DB():
 
 
 def check_DB(article_link):
-    engine = create_engine("sqlite:///philDB.db")
+    engine = create_engine("sqlite:///data/phil.db")
     Base = declarative_base()
 
     class Article(Base):
@@ -136,7 +136,7 @@ def check_DB(article_link):
 
 
 def import_DB():
-    engine = create_engine("sqlite:///philDB.db")
+    engine = create_engine("sqlite:///data/phil.db")
     Base = declarative_base()
 
     class Article(Base):
@@ -167,7 +167,7 @@ def import_DB():
 
 
 def rank_import_DB():
-    engine = create_engine("sqlite:///philDB.db")
+    engine = create_engine("sqlite:///data/phil.db")
     Base = declarative_base()
 
     class Article(Base):
