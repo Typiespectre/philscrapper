@@ -1,10 +1,16 @@
 from flask import Flask, render_template, request
 from database import make_DB, import_DB, rank_import_DB
 from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 
 def updateDB():
     make_DB()
+
+
+scheduler = BackgroundScheduler(daemon=True)
+scheduler.add_job(updateDB, "interval", hours=12)
+scheduler.start()
 
 
 app = Flask("philscrapper")
@@ -23,7 +29,6 @@ def find():
 
 
 if __name__ == "__main__":
-    scheduler = BackgroundScheduler()
-    job = scheduler.add_job(updateDB, "interval", hours=12)
-    scheduler.start()
+
     app.run()
+    atexit.register(lambda: scheduler.shutdown())
