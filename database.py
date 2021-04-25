@@ -4,9 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine(
-    "sqlite:///philDB.db?check_same_thread=False"
-)  # 터미널에 정보를 표시하기 위해선 echo=True
+engine = create_engine("sqlite:///data/philDB.db?check_same_thread=False")
 Base = declarative_base()
 
 
