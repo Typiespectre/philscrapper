@@ -70,19 +70,27 @@ def make_DB():
     from aeon import aeon_scrapping
     from sep import sep_scrapping
 
+    # from wiley import wiley_scrapping
+
+    # wiley rss feed 스크랩에 사용됨.
+    from datetime import datetime, timedelta
+
+    wiley_now = datetime.today().strftime("%Y%m%d")
+    wiley_months_ago = (datetime.today() - timedelta(weeks=1)).strftime("%Y%m%d")
+
     scrap_list = [
         apa_scrapping("http://blog.apaonline.org/feed/"),
         brainsblog_scrapping("https://philosophyofbrains.com/feed"),
         warpweftandway_scrapping("http://warpweftandway.com/feed/"),
         aeon_scrapping("https://aeon.co/feed.rss"),
         sep_scrapping("https://plato.stanford.edu/rss/sep.xml"),
+        # wiley_scrapping(
+        #    f"https://onlinelibrary.wiley.com/action/showFeed?ui=0&mi=1slcofg&type=search&feed=rss&query=%2526Ppub%253D{wiley_months_ago}-{wiley_now}%2526content%253DarticlesChapters%2526countTerms%253Dtrue%2526field1%253DAllField%2526target%253Ddefault%2526text1%253Dphilosophy"
+        # ),
     ]
 
     for elements in scrap_list:
         for i in elements:
-            db_article = Article(
-                i["name"], i["title"], i["link"], i["published"], i["tags"], i["rank"]
-            )
             try:
                 article = Article.get_or_create(
                     name=i["name"],
@@ -121,16 +129,15 @@ def import_DB():
             Article.title,
             Article.tags,
             Article.published,
-        )
-        .filter(
-            Article.published.between(weeks_ago, now),
-        )
-        .order_by(Article.published.desc())
-        .limit(10)
-        .all()
+        ).order_by(Article.published.desc())
+        # .limit(10)
+        # .filter(
+        #    Article.published.between(weeks_ago, now),
+        # )
+        # .filter(~Article.tags.in_(["others"]))
     )
     rows = results
-    session.close()
+    # session.close()
     return rows
 
 
@@ -144,6 +151,7 @@ def rank_import_DB():
             Article.published,
         )
         .filter(Article.rank == 1)
+        .filter(~Article.tags.in_(["others"]))
         .distinct(Article.name)
         .group_by(Article.name)
         .order_by(Article.name)
@@ -153,6 +161,3 @@ def rank_import_DB():
     rows = results
     session.close()
     return rows
-
-
-rank_import_DB()
