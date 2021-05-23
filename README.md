@@ -65,6 +65,6 @@ tag 및 사이트 별로 분류해서 보여주는 기능 생각하기
 5/9  
 수정요소 : nature, guardian 사이트 추가
 
-5/23
+5/23  
 수정요소 : Dailynous twitter 추가  
-수정필요 : top news에 대한 고민... 및 사이트 추가 (leiters report?)
+수정필요 : top news에 대한 고민... 및 사이트 추가 (leiters report?), dailynous twitter 게시글에서 quoted retweet을 제거하는 법 찾기.
