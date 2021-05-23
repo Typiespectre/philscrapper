@@ -13,6 +13,7 @@
       <h3> 
         <a href='/rank'>Top News</a>
       </h3>
+      <h3>Latest update : {{update}}</h3>
     </header>
     <main>
       {% if page_num > total %}
@@ -29,21 +30,23 @@
       <hr>
       {% endfor %}
     </main>
-    {% if page == 1 %}
-      <b>[Prev]</b>
-      <b>{{page}}</b>
-      <a href="{{url_for('home', page=page+1)}}">[Next]</a>
-    {% else %}
-      {% if page < last_page_num %}
-        <a href="{{url_for('home', page=page-1)}}">[Prev]</a>
+    <footer>
+      {% if page == 1 %}
+        <b>[Prev]</b>
         <b>{{page}}</b>
         <a href="{{url_for('home', page=page+1)}}">[Next]</a>
+      {% else %}
+        {% if page < last_page_num %}
+          <a href="{{url_for('home', page=page-1)}}">[Prev]</a>
+          <b>{{page}}</b>
+          <a href="{{url_for('home', page=page+1)}}">[Next]</a>
+        {% endif %}
       {% endif %}
-    {% endif %}
-    {% if page == last_page_num %}
-      <a href="{{url_for('home', page=page-1)}}">[Prev]</a>
-      <b>{{page}}</b>
-      <b>[Next]</b>
-    {% endif %}
+      {% if page == last_page_num %}
+        <a href="{{url_for('home', page=page-1)}}">[Prev]</a>
+        <b>{{page}}</b>
+        <b>[Next]</b>
+      {% endif %}
+  </footer>
   </body>
 </html> 

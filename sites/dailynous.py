@@ -1,177 +1,87 @@
+from database import check_DB
+import config
 import requests
+import json
 import re
-import unicodedata
-from bs4 import BeautifulSoup
+import textwrap
 from datetime import datetime
 from database import check_DB
 
-# 사이트의 rss feed에서 갱신되는 기사의 제목, 링크, 시간에 사이트 이름을 붙여서 가져온다.
-def dailynous_rss(url):
-    print("\nConnecting to Daily Nous rss feed...")
-    request_headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
-    }
+
+def auth():
+    bearer_token = config.bearer_token
+    return bearer_token
+
+
+def create_headers(bearer_token):
+    search_headers = {"Authorization": "Bearer {}".format(bearer_token)}
+    return search_headers
+
+
+def search_url():
+    query = "from:DailyNousEditor -is:reply -is:retweet"
+    tweet_fields = "tweet.fields=author_id,created_at,text"
+    user_fields = "user.fields=url"
+    max_results = "max_results=50"
+
+    search_url = "https://api.twitter.com/2/tweets/search/recent?query={}&{}&{}".format(
+        query, tweet_fields, max_results
+    )
+    return search_url
+
+
+def connect_to_endpoint(url, headers):
+    search_response = requests.request("GET", url, headers=headers)
+    if search_response.status_code != 200:
+        raise Exception(search_response.status_code, search_response.text)
+    return search_response.json()
+
+
+def dailynous_list(json_obj):
+    print("\nConnecting to DailyNous twitter...")
     global article_list
     article_list = []
     try:
-        r = requests.get(url, headers=request_headers)
-        soup = BeautifulSoup(r.content, "xml")
-        articles = soup.find_all("item")
-        for a in articles:
-            title = a.find("title").text.replace("\xa0", "")
-            link = a.find("link").text
-            time = a.find("pubDate").text.replace("+0000", "")
-            name = "Dailynous"
+        for i in json_obj["data"]:
+            text = i["text"]
+            regex = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+            link = re.findall(regex, text)[0]
 
-            dateFormatter = "%a, %d %b %Y %H:%M:%S "
-            dt = datetime.strptime(time, dateFormatter)
+            title = re.sub(link, "", text, flags=re.I)
+            title = textwrap.shorten(title, width=80, placeholder=" ...")
+
+            time = i["created_at"]
+            dateformatter = "%Y-%m-%dT%H:%M:%S.%fZ"
+            dt = datetime.strptime(time, dateformatter)
             published = dt.strftime("%Y-%m-%d")
 
-            # DB에 저장되어 있지 않은 데이터를 list에 append한다.
+            name = "DailyNous(twitter)"
+
             if check_DB(link) is not None:
                 article = {
                     "name": name,
                     "title": title,
                     "link": link,
                     "published": published,
+                    "tags": "twitter",
+                    "rank": 99,
                 }
                 article_list.append(article)
+        for i in range(len(article_list)):
+            print(f"New twitter found... {i}/{len(article_list)}")
+        print("Scrapping DailyNous Finished!\n")
         return article_list
     except Exception as e:
-        print("Daily Nous (rss feed) - The scraping job failed. See exception: ")
+        print("DailyNous (twitter) - The scraping job failed. See exception: ")
         print(e)
 
 
-# 갱신된 기사들의 text 전문을 가져온다.
-def dailynous_text(url, n, list_len):
-    print(f"scrapping article text... {n}/{list_len}")
-    text = ""
-    try:
-        r = requests.get(url)
-        soup = BeautifulSoup(r.text, "lxml")
-        for item in soup.find_all("div", {"class": "article__body__content"}):
-            text = text + str(item.find_all(text=True))
-            return text
-    except Exception as e:
-        print("Daily Nous (scrapping) - The scraping job failed. See exception: ")
-        print(e)
-
-
-# 갱신된 기사의 전문에 포함된 숫자와 특수문자들을 모두 제거한다. (아직은 딱히 쓸모 없는 기능)
-def clean_text(text):
-    new_text = ""
-    cleaned_text = re.sub(r"\\x..", "", text, flags=re.I)
-    cleaned_text = re.sub(r"\\n..", "", text, flags=re.I)
-    cleaned_text = re.sub(
-        "[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\('\"’”“–—]", "", cleaned_text
-    )
-    cleaned_text = re.sub(r"[0-9]", " ", cleaned_text)
-    cleaned_text = re.sub(r"\s+", " ", cleaned_text, flags=re.I)
-    cleaned_text = re.sub(r"^\s+", " ", cleaned_text)
-    cleaned_text = re.sub(r"\s+$", " ", cleaned_text)
-    cleaned_text = re.sub(r"\s+[a-zA-Z]\s+", " ", cleaned_text)
-    return cleaned_text
-
-
-# 전문에서 phil_types의 keywords 중 문자열의 일부에 맞는 단어가 있을 경우 tag를 한다.
-# keywords 참조 : https://m.blog.naver.com/PostView.nhn?blogId=sgjjojo&logNo=221184479000&proxyReferer=https:%2F%2Fwww.google.com%2F
-Aesthetics = ["Aesthetics"]
-Epistemology = [
-    "Epistemology",
-    "causality",
-    "freewill",
-    "determinism",
-    "teleology",
-    "anthropology",
-]
-Ethics = ["Ethics", "moral", "political"]
-Logic = [
-    "Logic",
-    "deduction",
-    "induction",
-    "dialectic",
-    "mathematical",
-    "demonstration",
-    "analogy",
-]
-Metaphysics = [
-    "Metaphysics",
-    "methodology",
-    "ontology",
-    "cosmology",
-]
-Eastern = ["Eastern", "chinese", "japan", "korean", "buddhist", "indian"]
-Minds = ["Minds", "psychology", "physicalism", "machine", "consciousness", "mentality"]
-
-phil_types = [Aesthetics, Epistemology, Ethics, Logic, Metaphysics, Eastern, Minds]
-
-
-def tagging(text):
-    tags = []
-    words = []
-    words_count = {}
-    for types in phil_types:
-        for keywords in types:
-            """
-            if re.search(keywords[:5], text, re.IGNORECASE):
-                if types[0] not in tags:
-                    tags.append(types[0])
-            """
-            word_found = re.findall(keywords[:5], text, re.IGNORECASE)
-            if len(word_found) != 0:
-                words += word_found
-    if len(words) == 0:
-        words.append("others")
-    # text 내에서 발견된 keyword의 종류와 개수 찾기
-    for i in words:
-        i = i.lower()
-        try:
-            words_count[i] += 1
-        except:
-            words_count[i] = 1
-    # text 내 전체 keyword의 평균 개수 미만 keyword는 포함하지 않음
-    keyword_average = sum(words_count.values()) // len(words_count)
-    for keys, values in words_count.items():
-        if values > keyword_average:
-            for types in phil_types:
-                for keywords in types:
-                    if keys == keywords[:5]:
-                        tags.append(types[0])
-    if len(tags) == 0:
-        tags.append("others")
-    # tag 중복 제거
-    tag_set = set(tags)
-    tag_list = list(tag_set)
-    tag = ", ".join(tag_list)
-    return tag
-
-
-# 위 함수들을 하나로 통합한 중심 함수!
-# rss feed로 갱신된 기사를 스크래핑하는 과정을 모두 포함하는 함수.
-def dailynous_scrapping(url):
-    dailynous_rss(url)
-    n = 1
-    for key in article_list:
-        text = guardian_text(key["link"], n, len(article_list))
-        text = clean_text(text)
-        key["text"] = text
-        key["tags"] = tagging(key["text"])
-        key["text_rank"] = len(key["text"])
-        del key["text"]
-        n += 1
-
-    # 순위 매기기
-    # tag가 'others'인 경우, 대부분 뉴스 기사가 아니기에 최하위 rank를 부여함
-    sort_article_list = enumerate(
-        sorted(article_list, key=lambda rank: (rank["text_rank"]), reverse=True), 1
-    )
-
-    for rank, key in sort_article_list:
-        if key["tags"] == "others":
-            key["rank"] = 99
-        else:
-            key["rank"] = rank
-        del key["text_rank"]
-
-    print("Scrapping Daily Nous Finished!\n")
+def dailynous_scrapping():
+    bearer_token = auth()
+    headers = create_headers(bearer_token)
+    url = search_url()
+    json_response = connect_to_endpoint(url, headers)
+    json_response = json.dumps(json_response, indent=4, sort_keys=True)
+    json_obj = json.loads(json_response)
+    dailynous_list(json_obj)
     return article_list

@@ -3,6 +3,7 @@ from database import make_DB, import_DB, rank_import_DB
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 import math
+import datetime
 
 
 def updateDB():
@@ -29,6 +30,9 @@ def home():
     page_prev_num = (page - 1) * 10 + 1
     page_num = page * 10
 
+    now = datetime.datetime.now()
+    update = now.strftime("%Y-%m-%d")
+
     return render_template(
         "home.html",
         rows=rows,
@@ -37,17 +41,22 @@ def home():
         page_prev_num=page_prev_num,
         page_num=page_num,
         total=total,
+        update=update,
     )
 
 
 @app.route("/rank")
 def rank():
     rows = rank_import_DB()
-    return render_template("rank.html", rows=rows)
+
+    now = datetime.datetime.now()
+    update = now.strftime("%Y-%m-%d")
+
+    return render_template("rank.html", rows=rows, update=update)
 
 
-make_DB()
 if __name__ == "__main__":
     # app.run("0.0.0.0", port=80)
+    make_DB()
     app.run()
     atexit.register(lambda: scheduler.shutdown())

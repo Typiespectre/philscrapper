@@ -71,6 +71,7 @@ def make_DB():
     from sites.sep import sep_scrapping
     from sites.guardian import guardian_scrapping
     from sites.nature import nature_scrapping
+    from sites.dailynous import dailynous_scrapping
 
     # from sites.dailynous import dailynous_scrapping
     # from wiley import wiley_scrapping
@@ -89,7 +90,7 @@ def make_DB():
         warpweftandway_scrapping("http://warpweftandway.com/feed/"),
         aeon_scrapping("https://aeon.co/feed.rss"),
         sep_scrapping("https://plato.stanford.edu/rss/sep.xml"),
-        # dailynous_scrapping("https://dailynous.com/feed/"),
+        dailynous_scrapping()
         # wiley_scrapping(
         #    f"https://onlinelibrary.wiley.com/action/showFeed?ui=0&mi=1slcofg&type=search&feed=rss&query=%2526Ppub%253D{wiley_months_ago}-{wiley_now}%2526content%253DarticlesChapters%2526countTerms%253Dtrue%2526field1%253DAllField%2526target%253Ddefault%2526text1%253Dphilosophy"
         # ),

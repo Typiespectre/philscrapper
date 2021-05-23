@@ -138,3 +138,6 @@ dmypy.json
 cython_debug/
 
 data/philDB.db
+
+# twitter API KEY
+config.py
