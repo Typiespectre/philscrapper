@@ -68,3 +68,7 @@ tag 및 사이트 별로 분류해서 보여주는 기능 생각하기
 5/23  
 수정요소 : Dailynous twitter 추가  
 수정필요 : top news에 대한 고민... 및 사이트 추가 (leiters report?), dailynous twitter 게시글에서 quoted retweet을 제거하는 법 찾기.
+
+5/30  
+수정요소 : leiter reports, philosophy blog 사이트 추가  
+수정필요 : philosophy blog text rss에서 뽑아오기, 함수들 정리, 태그 기능...?

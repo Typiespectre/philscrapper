@@ -1,6 +1,5 @@
 import requests
 import re
-import unicodedata
 from bs4 import BeautifulSoup
 from datetime import datetime
 from database import check_DB

@@ -5,8 +5,8 @@ from datetime import datetime
 from database import check_DB
 
 # 사이트의 rss feed에서 갱신되는 기사의 제목, 링크, 시간에 사이트 이름을 붙여서 가져온다.
-def brainsblog_rss(url):
-    print("\nConnecting to The Brains Blog rss feed...")
+def leiter_rss(url):
+    print("\nConnecting to Leiter Reports rss feed...")
     request_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
     }
@@ -19,8 +19,8 @@ def brainsblog_rss(url):
         for a in articles:
             title = a.find("title").text.replace("\xa0", "")
             link = a.find("link").text
-            time = a.find("pubDate").text.replace("+0000", "")
-            name = "The Brains Blog"
+            time = a.find("pubDate").text.replace("-0500", "")
+            name = "Leiter Reports"
 
             dateFormatter = "%a, %d %b %Y %H:%M:%S "
             dt = datetime.strptime(time, dateFormatter)
@@ -37,31 +37,38 @@ def brainsblog_rss(url):
                 article_list.append(article)
         return article_list
     except Exception as e:
-        print("The Brains Blog (rss feed) - The scraping job failed. See exception: ")
+        print("Leiter Reports (rss feed) - The scraping job failed. See exception: ")
         print(e)
 
 
 # 갱신된 기사들의 text 전문을 가져온다.
-def briansblog_text(url, n, list_len):
+def leiter_text(url, n, list_len):
     print(f"scrapping article text... {n}/{list_len}")
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36 Edg/88.0.705.74"
+    }
     text = ""
     try:
-        r = requests.get(url)
+        r = requests.get(url, headers=headers)
         soup = BeautifulSoup(r.text, "lxml")
-        for item in soup.find_all("div", {"class": "entry-content"}):
-            text = text + str(item.find_all(text=True))
+        for item in soup.find_all("div", {"class": "entry-body"}):
+            # 필요한 element 내부의 text만 가져와서 text에 합한다.
+            element_list = ["p"]
+            text_list = [
+                t for t in soup.find_all(text=True) if t.parent.name in element_list
+            ]
+            text = "".join(text_list)
             return text
     except Exception as e:
-        print("The Brains Blog (scrapping) - The scraping job failed. See exception: ")
+        print("Leiter Reports (scrapping) - The scraping job failed. See exception: ")
         print(e)
 
 
-# 갱신된 기사의 전문에 포함된 숫자와 특수문자들을 모두 제거한다. (아직은 딱히 쓸모 없는 기능)
+# 갱신된 기사의 전문에 포함된 특수문자들을 모두 제거한다. (아직은 딱히 쓸모 없는 기능)
 def clean_text(text):
-    new_text = ""
-    cleaned_text = re.sub(r"\\x..", "", text, flags=re.I).strip()
+    cleaned_text = text.strip().replace("\n", "")
     cleaned_text = re.sub(
-        "[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\('\"’”“–—]", "", cleaned_text
+        "[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\('\"’”“–]", "", cleaned_text
     )
     cleaned_text = re.sub(r"[0-9]", " ", cleaned_text)
     cleaned_text = re.sub(r"\s+", " ", cleaned_text, flags=re.I)
@@ -88,6 +95,7 @@ Logic = [
     "deduction",
     "induction",
     "dialectic",
+    "formal",
     "mathematical",
     "demonstration",
     "analogy",
@@ -146,11 +154,11 @@ def tagging(text):
 
 # 위 함수들을 하나로 통합한 중심 함수!
 # rss feed로 갱신된 기사를 스크래핑하는 과정을 모두 포함하는 함수.
-def brainsblog_scrapping(url):
-    brainsblog_rss(url)
+def leiter_scrapping(url):
+    leiter_rss(url)
     n = 1
     for key in article_list:
-        text = briansblog_text(key["link"], n, len(article_list))
+        text = leiter_text(key["link"], n, len(article_list))
         text = clean_text(text)
         key["text"] = text
         key["tags"] = tagging(key["text"])
@@ -171,5 +179,5 @@ def brainsblog_scrapping(url):
             key["rank"] = rank
         del key["text_rank"]
 
-    print("Scrapping The Brains Blog Finished!\n")
+    print("Scrapping Leiter Reports Finished!\n")
     return article_list

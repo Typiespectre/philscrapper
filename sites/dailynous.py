@@ -67,7 +67,7 @@ def dailynous_list(json_obj):
                     "rank": 99,
                 }
                 article_list.append(article)
-        for i in range(len(article_list)):
+        for i in range(1, len(article_list) + 1):
             print(f"New twitter found... {i}/{len(article_list)}")
         print("Scrapping DailyNous Finished!\n")
         return article_list
