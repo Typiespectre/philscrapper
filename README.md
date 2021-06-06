@@ -72,3 +72,7 @@ tag 및 사이트 별로 분류해서 보여주는 기능 생각하기
 5/30  
 수정요소 : leiter reports, philosophy blog 사이트 추가  
 수정필요 : philosophy blog text rss에서 뽑아오기, 함수들 정리, 태그 기능...?
+
+6/6  
+수정요소 : psyche 사이트 추가, 함수들 정리, wiley 사이트 삭제  
+수정필요 : 다른 철학 사이트들 찾기, 기능 생각...
