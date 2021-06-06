@@ -74,15 +74,7 @@ def make_DB():
     from sites.dailynous import dailynous_scrapping
     from sites.leiter import leiter_scrapping
     from sites.philblog import philblog_scrapping
-
-    # from sites.dailynous import dailynous_scrapping
-    # from wiley import wiley_scrapping
-
-    # wiley rss feed 스크랩에 사용됨.
-    from datetime import datetime, timedelta
-
-    wiley_now = datetime.today().strftime("%Y%m%d")
-    wiley_months_ago = (datetime.today() - timedelta(weeks=1)).strftime("%Y%m%d")
+    from sites.psyche import psyche_scrapping
 
     scrap_list = [
         nature_scrapping("https://www.nature.com/subjects/philosophy.rss"),
@@ -94,10 +86,8 @@ def make_DB():
         sep_scrapping("https://plato.stanford.edu/rss/sep.xml"),
         dailynous_scrapping(),
         leiter_scrapping("https://leiterreports.typepad.com/blog/rss.xml"),
-        philblog_scrapping("http://aphilosopher.drmcl.com/feed/")
-        # wiley_scrapping(
-        #    f"https://onlinelibrary.wiley.com/action/showFeed?ui=0&mi=1slcofg&type=search&feed=rss&query=%2526Ppub%253D{wiley_months_ago}-{wiley_now}%2526content%253DarticlesChapters%2526countTerms%253Dtrue%2526field1%253DAllField%2526target%253Ddefault%2526text1%253Dphilosophy"
-        # ),
+        philblog_scrapping("http://aphilosopher.drmcl.com/feed/"),
+        psyche_scrapping("https://psyche.co/feed"),
     ]
 
     for elements in scrap_list:
@@ -127,9 +117,8 @@ def check_DB(article_link):
 
 
 def import_DB():
-    from datetime import datetime, timedelta, timezone
+    from datetime import datetime, timedelta
 
-    # timezone(timedelta(hours=9))
     now = datetime.today().strftime("%Y-%m-%d")
     weeks_ago = (datetime.today() - timedelta(weeks=1)).strftime("%Y-%m-%d")
 
@@ -140,15 +129,12 @@ def import_DB():
             Article.title,
             Article.tags,
             Article.published,
-        ).order_by(Article.published.desc())
-        # .limit(10)
-        # .filter(
-        #    Article.published.between(weeks_ago, now),
-        # )
-        # .filter(~Article.tags.in_(["others"]))
+        )
+        .order_by(Article.published.desc())
+        .order_by(Article.name)
     )
     rows = results
-    # session.close()
+    session.close()
     return rows
 
 
