@@ -55,6 +55,33 @@ class Article(Base):
         )
 
 
+class Comment(Base):
+    __tablename__ = "Comment"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    article_id = Column(Integer, nullable=False)
+    content = Column(String, nullable=False)
+    userid = Column(String, nullable=False)
+    created = Column(String, nullable=False)
+
+    def __init__(self, article_id, content, userid, created):
+        self.article_id = article_id
+        self.content = content
+        self.userid = userid
+        self.created = created
+
+    def __repr__(self):
+        return "<Article('%s','%s','%s','%s')>" % (
+            self.article_id,
+            self.content,
+            self.userid,
+            self.created,
+        )
+
+    def as_dict(self):
+        return {x.name: getattr(self, x.name) for x in self.__table__.columns}
+
+
 Base.metadata.create_all(engine)
 
 Session = sessionmaker()
@@ -117,13 +144,14 @@ def check_DB(article_link):
 
 
 def import_DB():
-    from datetime import datetime, timedelta
+    # from datetime import datetime, timedelta
 
-    now = datetime.today().strftime("%Y-%m-%d")
-    weeks_ago = (datetime.today() - timedelta(weeks=1)).strftime("%Y-%m-%d")
+    # now = datetime.today().strftime("%Y-%m-%d")
+    # weeks_ago = (datetime.today() - timedelta(weeks=1)).strftime("%Y-%m-%d")
 
     results = (
         session.query(
+            Article.id,
             Article.name,
             Article.link,
             Article.title,
@@ -132,6 +160,22 @@ def import_DB():
         )
         .order_by(Article.published.desc())
         .order_by(Article.name)
+    )
+    rows = results
+    session.close()
+    return rows
+
+
+def article_DB(id):
+    results = (
+        session.query(
+            Article.id,
+            Article.link,
+            Article.title,
+            Article.published,
+        )
+        .filter(Article.id == id)
+        .all()
     )
     rows = results
     session.close()
@@ -158,3 +202,30 @@ def rank_import_DB():
     rows = results
     session.close()
     return rows
+
+
+def add_comment(article_id, content, userid, created):
+    comment = Comment(article_id, content, userid, created)
+    session.add(comment)
+    session.commit()
+
+
+def comment_DB(id):
+    results = (
+        session.query(
+            Comment.article_id,
+            Comment.content,
+            Comment.userid,
+            Comment.created,
+        )
+        .filter(Comment.article_id == id)
+        .all()
+    )
+    rows = results
+    session.close()
+    return rows
+
+
+def comment_count(id):
+    results = session.query(Comment).filter(Comment.article_id == id).count()
+    return results

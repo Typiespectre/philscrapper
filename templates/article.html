@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Philnewsfeed</title>
+    <link href="https://andybrewer.github.io/mvp/mvp.css" rel="stylesheet"></link>
+  </head>
+  <body>
+    <header>
+      <h1>
+        <a href='/'>Philnewsfeed</a>
+      </h1>
+    </header>
+    <main>
+      {% for row in rows %}
+      <div>
+        <h3 style="display:inline;"><a href='{{row[1]}}'>{{row[2]}}</a></h3>
+        <h5 style="display:inline;"> | {{row[3]}}</h5>
+      </div>
+      {% endfor %}
+
+      <div>
+        <ol>
+          {% for comment in comments %}
+            <li><h5>{{comment[1]}}<br>{{comment[2]}} | {{comment[3]}}</h5></li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <ul>
+        {% for message in messages %}
+        <li>{{message}}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+
+      {% block content %}
+      <form action="{{ url_for('comment', article_id = rows[0][0])}}" method="post">
+        <textarea name="commentContent" id="commentContent" rows="5"></textarea>
+        <textarea name="userid" id="userid" rows='1'></textarea>
+        <input type="submit" value="Comment">
+      </form>
+      {% endblock %}
+    </main>
+  </body>
+</html> 

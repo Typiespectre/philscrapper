@@ -1,5 +1,14 @@
-from flask import Flask, render_template, request
-from database import make_DB, import_DB, rank_import_DB
+from flask import Flask, render_template, request, redirect, url_for, flash
+from sqlalchemy.sql.functions import count
+from database import (
+    make_DB,
+    import_DB,
+    rank_import_DB,
+    article_DB,
+    add_comment,
+    comment_DB,
+    comment_count,
+)
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 import math
@@ -16,6 +25,7 @@ scheduler.start()
 
 
 app = Flask("philscrapper")
+app.secret_key = "cGhpbHNjcmFwcGVy"
 
 
 @app.route("/")
@@ -53,6 +63,31 @@ def rank():
     update = now.strftime("%Y-%m-%d")
 
     return render_template("rank.html", rows=rows, update=update)
+
+
+@app.route("/article/<int:id>/")
+def article(id):
+    rows = article_DB(id)
+    comments = comment_DB(id)
+    return render_template("article.html", rows=rows, comments=comments)
+
+
+@app.route("/comment/<int:article_id>", methods=("POST",))
+def comment(article_id):
+    error = None
+    now = datetime.datetime.now()
+
+    articleID = int(article_id)
+    content = request.form["commentContent"]
+    userid = request.form["userid"]
+    created = now.strftime("%Y-%m-%d %H:%M:%S")
+
+    if len(content) == 0 or len(userid) == 0:
+        error = "Please fill in the blanks."
+        flash(error)
+    else:
+        add_comment(articleID, content, userid, created)
+    return redirect(url_for("article", id=article_id))
 
 
 if __name__ == "__main__":
